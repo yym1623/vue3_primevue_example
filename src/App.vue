@@ -11,11 +11,12 @@ const itemCheck = ref(false);
 const searchCheck = ref(false);
 const products = ref();
 const files = ref([]);
-
+const items = ref([]);
 
 
     
 const searchEnter = async () => {
+
   searchCheck.value = true
   let params = {
     script_to_execute: 'search',
@@ -31,17 +32,26 @@ const searchEnter = async () => {
     if(item.length > 0) {
       itemCheck.value = true;
       searchCheck.value = true;
+
+      const objs = ref({})
     
     // arr index로 넣는게 아닌 arr index안 file_name의 index라서 해당 전체 index안에서 다시 file_name index만큼 다시 돌기위해 map 안에 다시 for로 중복정의 -> 5까지 정해져있어서 고정값 지정
-    //   item.map(obj => {
-    //     for (let i = 1; i <= 5; i++) {
-    //       if (obj[`file_name_${i}`] !== null) {
-    //         files.value.push(obj[`file_name_${i}`]);
-    //       }
-    //     }
-    // });
+    item.forEach(obj => {
+      for (let i = 0; i <= 5; i++) {
+        console.log(obj[`file_name_${i}`])
+        if (obj[`file_name_${i}`] !== null) {
+          objs.value[`name_${i}`] = obj[`file_name_${i}`];
+        }
+      }
+      files.value.push(objs.value)
+    });
+
+    console.log('파일검사ㅏ')
+    console.log(files.value)
 
       products.value = JSON.parse(jsonString)
+      items.value = JSON.parse(jsonString).map((item) => item.kms_sj);
+
       toast.add({ severity: 'success', summary: '알림', detail: `총 ${item.length}개 검색되었습니다 `, life: 3000 });
 
     } else {
@@ -56,14 +66,16 @@ const searchEnter = async () => {
   }
 }
 
+
 </script>
 
 <template>
   
   <div class="search-group">
     <Toast />
+    <t />
     <div class="card p-fluid">
-      <AutoComplete v-model="data" @complete="searchEnter" />
+      <AutoComplete v-model="data" :suggestions="items" @complete="searchEnter" />
     </div>
 
     <div class="card" v-if="searchCheck">
@@ -77,7 +89,8 @@ const searchEnter = async () => {
                 <Fieldset class="datav-view"  selectionMode='single' :legend="item.kms_sj">
                   <p class="m-0">{{ item.kms_cn }}</p>
                   
-                  <Chip label='아' v-tooltip="'아'" />
+                  <!-- 반복할 요소 상위에다하면 해당 자식도 반복되는지 -> 반복안되면 상위 반복데이터 자식에 넣으면 되는지 -> 아니면 자식에다가 넣어야 반복만큼되는지(이건됨) -> 상위에서 해도 내려받아지면서 같이 반복되는지 확인, 중복 for문 자기꺼만 추출해서 넣는방법 검색 -->
+                  <Chip v-for="file in files" :label='file' v-tooltip="'아'" />
                 </Fieldset>
               </div>
             </div>
