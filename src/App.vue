@@ -6,11 +6,13 @@ import axios from 'axios'
 import { useToast } from "primevue/usetoast";
 const toast = useToast();
 
+// modules
+import file from '@/modules/file.ts'
+
 const data = ref(null);
 const itemCheck = ref(false);
 const searchCheck = ref(false);
-const products = ref();
-const files = ref([]);
+const products = ref([]);
 const items = ref([]);
 
 
@@ -61,6 +63,19 @@ const searchEnter = async () => {
     console.error('Error sending refresh request:', error);
 
   }
+
+
+}
+function test(atchFileId, fileNm, index) {
+
+  const fileObj = {
+      atchFileId: atchFileId,    // 파일 고유 번호
+      fileSn: index,            // 파일 순서
+      fileNm: fileNm                                // 파일 이름
+  }
+
+  // 첨부 파일 처리 : 미리보기 || 다운로드
+  file(fileObj);
 }
 
 
@@ -68,24 +83,24 @@ const searchEnter = async () => {
 
 <template>
   <div class="search-group">
+    <!-- Alarm -->
     <Toast />
+    <!-- AutoComplete -->
     <div class="card p-fluid">
       <AutoComplete v-model="data" :suggestions="items" @complete="searchEnter" />
     </div>
 
+    <!-- DataView -->
     <div class="card" v-if="searchCheck">
       <template v-if="itemCheck">
         <DataView :value="products" paginator :rows="5">
-          <!-- template로 따로 설정할때 #list값 필요 -> list value값은 검색 (아무값이나 주기만해도 나오고 안 주면 안나옴 기본 dataview쓸거 아니고 template로 따로 그 안 디테일 설정할때 사용) -->
-          <!-- pagination -> 컴포넌트가 아닌 옵션으로 할때 등등 template쪽에 값을 넣으면 해당 값은 item이 붙으면서 v-for로 들어가는 규칙 -> 검색 -->
           <template #list="products">
             <div class="flex flex-col">
               <div v-for="(item, index) in products.items" :key="index">
                 <Fieldset class="datav-view"  selectionMode='single' :legend="item.kms_sj">
                   <p class="m-0">{{ item.kms_cn }}</p>
-                  <!-- 반복할 요소 상위에다하면 해당 자식도 반복되는지 -> 반복안되면 상위 반복데이터 자식에 넣으면 되는지 -> 아니면 자식에다가 넣어야 반복만큼되는지(이건됨) -> 상위에서 해도 내려받아지면서 같이 반복되는지 확인, 중복 for문 자기꺼만 추출해서 넣는방법 검색 -->
                   <template v-for="(i, e) in 5" :key="e">
-                    <Chip v-if="item['file_name_' + e]" :label="item['file_name_' + e]" v-tooltip="item['file_content_' + e]" />
+                    <Chip v-if="item['file_name_' + e]" @click="test(item.atch_file_id, item['file_name_' + e], e)" :label="item['file_name_' + e]" v-tooltip="item['file_content_' + e]" />
                   </template>
                 </Fieldset>
               </div>
@@ -94,7 +109,8 @@ const searchEnter = async () => {
         </DataView>
       </template>
       <template v-else>
-        <Skeleton v-for="a in 5" :key="a" class="skeleton"></Skeleton>
+        <!-- Skeleton -->
+        <Skeleton v-for="a in 5" :key="a" class="skeleton" />
       </template>
     </div>
   </div>
@@ -111,7 +127,6 @@ const searchEnter = async () => {
   width: 800px;
   margin: auto;
 }
-
 
 .skeleton {
   width: 50rem;
