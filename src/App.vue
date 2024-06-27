@@ -33,26 +33,23 @@ const searchEnter = async () => {
       itemCheck.value = true;
       searchCheck.value = true;
 
-      const objs = ref({})
     
-    // arr index로 넣는게 아닌 arr index안 file_name의 index라서 해당 전체 index안에서 다시 file_name index만큼 다시 돌기위해 map 안에 다시 for로 중복정의 -> 5까지 정해져있어서 고정값 지정
-    item.forEach(obj => {
-      for (let i = 0; i <= 5; i++) {
-        console.log(obj[`file_name_${i}`])
-        if (obj[`file_name_${i}`] !== null) {
-          objs.value[`name_${i}`] = obj[`file_name_${i}`];
-        }
-      }
-      files.value.push(objs.value)
-    });
+      // item.forEach(obj => {
+      //   const fileItem = ref()
+      //   // 받아온 arr[obj 10] 거에서 obj 특정값만 뽑아서 새로운 obj 넣고 -> arr에 넣을때 -> obj는 반복문 끝날때마다 초기화가 되어야지 새로운게 들어가서 끝날떄마다 arr에 잘 들어간다( 초기화 없으면 마지막꺼가 반복되 들어간다 이래서 특정값 obj 새롭게 뽑아서 넣을땐 반복문 밖에 초기화로 선언해야 초기화되면서 새로운 값이 추가될 수 있다 -> arr는 밖이지만 obj는 반복문시작될때 초기화로 선언해서 넣자(밖에다 넣으면 반복문때마다 초기화하는거니 그냥 반복문때마다 선언으로 초기화가 더 낫다 보통 이렇게 쓴다))
+      //   for (let i = 0; i <= 4; i++) {
+      //     if (obj[`file_name_${i}`] !== null) {
+      //       fileItem.value = obj[`file_name_${i}`];
+      //     }
+      //   }
+      //   files.value.push(fileItem.value)
+      // });
 
-    console.log('파일검사ㅏ')
-    console.log(files.value)
 
-      products.value = JSON.parse(jsonString)
-      items.value = JSON.parse(jsonString).map((item) => item.kms_sj);
+    products.value = JSON.parse(jsonString)
+    items.value = JSON.parse(jsonString).map((item) => item.kms_sj);
 
-      toast.add({ severity: 'success', summary: '알림', detail: `총 ${item.length}개 검색되었습니다 `, life: 3000 });
+    toast.add({ severity: 'success', summary: '알림', detail: `총 ${item.length}개 검색되었습니다 `, life: 3000 });
 
     } else {
       itemCheck.value = false
@@ -70,10 +67,8 @@ const searchEnter = async () => {
 </script>
 
 <template>
-  
   <div class="search-group">
     <Toast />
-    <t />
     <div class="card p-fluid">
       <AutoComplete v-model="data" :suggestions="items" @complete="searchEnter" />
     </div>
@@ -88,9 +83,10 @@ const searchEnter = async () => {
               <div v-for="(item, index) in products.items" :key="index">
                 <Fieldset class="datav-view"  selectionMode='single' :legend="item.kms_sj">
                   <p class="m-0">{{ item.kms_cn }}</p>
-                  
                   <!-- 반복할 요소 상위에다하면 해당 자식도 반복되는지 -> 반복안되면 상위 반복데이터 자식에 넣으면 되는지 -> 아니면 자식에다가 넣어야 반복만큼되는지(이건됨) -> 상위에서 해도 내려받아지면서 같이 반복되는지 확인, 중복 for문 자기꺼만 추출해서 넣는방법 검색 -->
-                  <Chip v-for="file in files" :label='file' v-tooltip="'아'" />
+                  <template v-for="(i, e) in 5" :key="e">
+                    <Chip v-if="item['file_name_' + e]" :label="item['file_name_' + e]" v-tooltip="item['file_content_' + e]" />
+                  </template>
                 </Fieldset>
               </div>
             </div>
